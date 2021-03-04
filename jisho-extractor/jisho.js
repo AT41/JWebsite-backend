@@ -62,33 +62,59 @@ async function getAllWords() {
 //getAllWords();
 
 function writeToSQL() {
-    var data = JSON.parse(fs.readFileSync(`output-raw-jlpt-n${jlptLevel}.json`));
+    var data = JSON.parse(fs.readFileSync(`output-raw-jlpt-n${jlptLevel}.json`)).filter(datum => datum['jlpt'].length === 1);
     var cardIdIncrement = 0, setIdIncrement = 0;
 
     var cards = [], wordTypes = [], sets = [], answers = [];
 
     data.forEach(datum => {
-        calculateWordType(datum['senses'][0]['parts_of_speech']);
-        /*cards.push({
+        if (cardIdIncrement % 20 === 0) {
+            sets.push({
+                Id: setIdStart + setIdIncrement,
+                SetName: `JLPT-N${jlptLevel} Part ${setIdIncrement + 1}`,
+                SetOwner: 'global',
+                SupersetId: supersetId
+            })
+            setIdIncrement++;
+        }
+
+        const currWordType = calculateWordType(datum['senses'][0]['parts_of_speech']);
+        cards.push({
             Id: cardIdStart + cardIdIncrement,
-            SetId: setIdStart + setIdIncrement,
-            WordType: calculateWordType(datum['senses'][0]['parts_of_speech']).Id,
-            Kanji: datum['japanese'][0]['word'],
+            SetId: setIdStart + setIdIncrement - 1,
+            WordType: currWordType.Id,
+            Kanji: datum['japanese'][0]['word'] || datum['japanese'][0]['reading'],
             Furigana: datum['japanese'][0]['reading'],
             CardOwner: 'global'
         });
 
-        answers.push({
+        datum['senses'][0]['english_definitions'].forEach(definition => {
+            answers.push({
+                Definition: definition,
+                CardId: cardIdStart + cardIdIncrement,
+                Owner: 'global'
+            });
+        });
 
-        })*/
-    })
+        if (wordTypes.findIndex(wordType => wordType.Id === currWordType.Id) === -1) {
+            wordTypes.push(currWordType);
+        }
+        cardIdIncrement++;
+    });
+
+    cards = objectToSQL(cards, 'Card');
+    wordTypes = objectToSQL(wordTypes, 'CardsWordtype', true);
+    answers = objectToSQL(answers, 'EnglishDefinition');
+    sets = objectToSQL(sets, 'Set');
+    var superset = objectToSQL([{Id: supersetId, SupersetOwner: 'global', SupersetName: `JLPT-N${jlptLevel}`}], 'Superset')
+    fs.writeFileSync(`output-JLPT-N${jlptLevel}.sql`, `${superset};\n${sets};\n${wordTypes};\n${cards};\n${answers};`)
 }
 
 var unknownTypes = new Set();
 function calculateWordType(allTypes) {
     var wordType = {}, id = 0;
     allTypesGlobal.forEach(type => {
-        wordType[type] = 'false';
+        wordType[type] = false;
     });
     allTypes.forEach(type => {
         var typeId = allTypesGlobal.findIndex((typeGlobal) => type === typeGlobal);
@@ -114,12 +140,14 @@ function calculateWordType(allTypes) {
             } else if (type.includes('Suru') && type.includes('irregular')) {
                 typeId = 6;
             } else if (type === 'No-adjective') {
-                typeId = 6;
+                return;
             }
         }
-        if (typeId === -1 && !unknownTypes.has(type)) {
-            console.log(type);
-            unknownTypes.add(type);
+        if (typeId === -1) {
+            if (!unknownTypes.has(type)) {
+                unknownTypes.add(type);
+                console.log(type);
+            }
             return;
         }
         if (wordType[allTypesGlobal[typeId]] === false) {
@@ -131,8 +159,15 @@ function calculateWordType(allTypes) {
     return wordType;
 }
 
-function objectToSQL() {
-
+function objectToSQL(arrayObj, name, shouldIgnore = false) {
+    var sqlInserts = `INSERT ${shouldIgnore ? 'IGNORE ' : ''}INTO japanese.${name}(${Object.keys(arrayObj[0]).join(',')}) VALUES `;
+    sqlInserts += arrayObj.map(obj => 
+       '(' + Object.keys(obj)
+        .map(key => typeof obj[key] === 'string' ? obj[key].replace(/'/g, "\\'") : obj[key])
+        .map(val => ((typeof val === 'string') ? ("'" + val + "'") : val))
+        .join(',') + ')'
+    ).join(',\n');
+    return sqlInserts;
 }
 
 writeToSQL();
