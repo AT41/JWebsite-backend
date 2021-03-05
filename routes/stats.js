@@ -1,7 +1,3 @@
-/**
- * Route for stats
- */
-
 var express = require('express');
 var router = express.Router();
 var db_stats = require('../mySQL/queries/db_stats');

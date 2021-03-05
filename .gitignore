@@ -21,5 +21,7 @@ config.js
 !.vscode/extensions.json
 .history/*
 
-#gcloud
+#gcloud/firebase
 .dockerignore
+#firebase-auth.json can be generated from firebase console > settings > service accounts
+firebase-auth.json

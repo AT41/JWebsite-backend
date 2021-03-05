@@ -1,7 +1,3 @@
-/**
- * Route for getting sets
- */
-
 var express = require('express');
 var router = express.Router();
 var db_englishdefinitions = require('../mySQL/queries/db_englishdefinitions');
