@@ -1,7 +1,7 @@
 var mysql = require('mysql2');
 var rxjs = require('rxjs');
 // ASK ANTHONY FOR THIS FILE, CONTAINS SENSITIVE INFO TO LOG INTO DATABASE
-var config = require('../config');
+var config = require('mySQL/config');
 
 // Maintains a list of connections that are shared between threads.
 // If all connections are being used by a user then new connections will be created/destroyed.

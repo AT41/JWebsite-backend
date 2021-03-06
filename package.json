@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "node bin/www",
-    "devserver": "nodemon bin/www"
+    "devserver": "nodemon bin/www",
+    "deploy": "gcloud run deploy --image gcr.io/jwebsite-305902/backend --platform managed"
   },
   "author": "",
   "license": "ISC",
