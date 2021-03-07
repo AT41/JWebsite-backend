@@ -19,7 +19,7 @@ var app = express();
  * Modify CORS policy
  * Based off: https://brianflove.com/2017-03-22/express-cors-typescript/
  */
-const API_URL = ['http://localhost:4200', 'http://10.0.0.226', 'http://70.77.141.252', 'jwebsite-e97d3.web.app'];
+const API_URL = ['http://localhost:4200', 'http://10.0.0.226', 'http://70.77.141.252', 'https://jwebsite-e97d3.web.app'];
 const options = {
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'X-Access-Token'],
   credentials: true,

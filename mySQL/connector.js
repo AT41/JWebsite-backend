@@ -15,13 +15,19 @@ pool.my_db_query = function(myQuery) {
     var pool = flashcardsPool;
 
     pool.getConnection(function(err, connection) {
-      connection.query(myQuery, function(error, results, fields) {
-        console.log(error);
-        // TODO Error checking
-        observer.next(results);
+      if (err) {
+        observer.next(err);
         observer.complete();
-        connection.release();
-      });
+      } else {
+        console.log(err)
+        connection.query(myQuery, function(error, results, fields) {
+          console.log(error);
+          // TODO Error checking
+          observer.next(results);
+          observer.complete();
+          connection.release();
+        });
+      }
     });
   });
 };
