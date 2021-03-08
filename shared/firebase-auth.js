@@ -14,7 +14,7 @@ firebaseAuth.verifyIdToken = function verifyIdToken(idToken) {
         })
         .catch((error) => {
           // Handle error
-          console.log(error);
+          console.log('ERROR PROCESSING FIREBASE AUTH TOKEN: ', error);
           rej(false);
         });
       });

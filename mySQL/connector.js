@@ -16,12 +16,13 @@ pool.my_db_query = function(myQuery) {
 
     pool.getConnection(function(err, connection) {
       if (err) {
-        observer.next(err);
+        observer.next('ERROR', err);
         observer.complete();
       } else {
-        console.log(err)
         connection.query(myQuery, function(error, results, fields) {
-          console.log(error);
+          if (error) {
+            console.log('ERROR', error);
+          }
           // TODO Error checking
           observer.next(results);
           observer.complete();
