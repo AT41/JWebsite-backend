@@ -1,10 +1,23 @@
 var https = require('https');
 var fs = require('fs');
 
-var jlptLevel = 5;
-var cardIdStart = 0;
-var setIdStart = 0;
+var jlptLevel = 4;
 var supersetId = jlptLevel;
+var supersetDescription = `JLPT-N${jlptLevel} Vocabulary with the jlpt-n${jlptLevel} tag. Words and definitions are retrieved from Jisho.org's database.`
+
+var cardAndSetIdStarts = [{},
+    {},
+    {},
+    {},
+    {
+        cardIdStart: 600,
+        setIdStart: 50
+    },
+    {
+        cardIdStart: 0,
+        setIdStart: 0
+    }
+]
 
 var allTypesGlobal = [
     `Noun`,
@@ -59,10 +72,15 @@ async function getAllWords() {
     fs.writeFileSync(`output-raw-jlpt-n${jlptLevel}.json`, data);
 }
 
-//getAllWords();
-
 function writeToSQL() {
-    var data = JSON.parse(fs.readFileSync(`output-raw-jlpt-n${jlptLevel}.json`)).filter(datum => datum['jlpt'].length === 1);
+    var jlpts = new Set();
+    var data = JSON.parse(fs.readFileSync(`output-raw-jlpt-n${jlptLevel}.json`)).filter(datum => {
+        return !datum['jlpt'].some(jlptLevelInner => {
+            jlpts.add(jlptLevelInner);
+            return parseInt(jlptLevelInner.match(/\d/)[0]) < jlptLevel
+        });
+    });
+    console.log(jlpts);
     var cardIdIncrement = 0, setIdIncrement = 0;
 
     var cards = [], wordTypes = [], sets = [], answers = [];
@@ -70,7 +88,7 @@ function writeToSQL() {
     data.forEach(datum => {
         if (cardIdIncrement % 20 === 0) {
             sets.push({
-                Id: setIdStart + setIdIncrement,
+                Id: cardAndSetIdStarts[jlptLevel].setIdStart + setIdIncrement,
                 SetName: `JLPT-N${jlptLevel} Part ${setIdIncrement + 1}`,
                 SetOwner: 'global',
                 SupersetId: supersetId
@@ -80,8 +98,8 @@ function writeToSQL() {
 
         const currWordType = calculateWordType(datum['senses'][0]['parts_of_speech']);
         cards.push({
-            Id: cardIdStart + cardIdIncrement,
-            SetId: setIdStart + setIdIncrement - 1,
+            Id: cardAndSetIdStarts[jlptLevel].cardIdStart + cardIdIncrement,
+            SetId: cardAndSetIdStarts[jlptLevel].setIdStart + setIdIncrement - 1,
             WordType: currWordType.Id,
             Kanji: datum['japanese'][0]['word'] || datum['japanese'][0]['reading'],
             Furigana: datum['japanese'][0]['reading'],
@@ -91,7 +109,7 @@ function writeToSQL() {
         datum['senses'][0]['english_definitions'].forEach(definition => {
             answers.push({
                 Definition: definition,
-                CardId: cardIdStart + cardIdIncrement,
+                CardId: cardAndSetIdStarts[jlptLevel].cardIdStart + cardIdIncrement,
                 Owner: 'global'
             });
         });
@@ -106,8 +124,13 @@ function writeToSQL() {
     wordTypes = objectToSQL(wordTypes, 'CardsWordtype', true);
     answers = objectToSQL(answers, 'EnglishDefinition');
     sets = objectToSQL(sets, 'Set');
-    var superset = objectToSQL([{Id: supersetId, SupersetOwner: 'global', SupersetName: `JLPT-N${jlptLevel}`}], 'Superset')
-    fs.writeFileSync(`output-JLPT-N${jlptLevel}.sql`, `${superset};\n${sets};\n${wordTypes};\n${cards};\n${answers};`)
+    var superset = objectToSQL([{Id: supersetId, SupersetOwner: 'global', SupersetName: `JLPT-N${jlptLevel}`, SupersetDescription: `${supersetDescription}`, Picture: 'jishologo.png'}], 'Superset')
+    var sqlData = `${superset};\n${sets};\n${wordTypes};\n${cards};\n${answers}`;
+    [...sqlData.matchAll(/[^\n]*�+[^\n]*\n/g)].forEach(match => {
+        console.error('INVALID SYMBOL: ', match[0]);
+    });
+
+    fs.writeFileSync(`output-JLPT-N${jlptLevel}.sql`, sqlData);
 }
 
 var unknownTypes = new Set();
@@ -170,7 +193,9 @@ function objectToSQL(arrayObj, name, shouldIgnore = false) {
     return sqlInserts;
 }
 
+//getAllWords();
 writeToSQL();
+
 /*
   `Id` int NOT NULL,
   `SetId` int DEFAULT NULL,

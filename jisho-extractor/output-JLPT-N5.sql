@@ -1,4 +1,4 @@
-INSERT INTO japanese.Superset(Id,SupersetOwner,SupersetName) VALUES (5,'global','JLPT-N5');
+INSERT INTO japanese.Superset(Id,SupersetOwner,SupersetName,SupersetDescription,Picture) VALUES (5,'global','JLPT-N5','JLPT-N5 Vocabulary with the jlpt-n5 tag. Words and definitions are retrieved from Jisho.org\'s database.','jishologo.png');
 INSERT INTO japanese.Set(Id,SetName,SetOwner,SupersetId) VALUES (0,'JLPT-N5 Part 1','global',5),
 (1,'JLPT-N5 Part 2','global',5),
 (2,'JLPT-N5 Part 3','global',5),
@@ -72,7 +72,7 @@ INSERT INTO japanese.Card(Id,SetId,WordType,Kanji,Furigana,CardOwner) VALUES (0,
 (31,1,1,'家族','かぞく','global'),
 (32,1,1,'花','はな','global'),
 (33,1,1,'猫','ねこ','global'),
-(34,1,1,'毎���','まいにち','global'),
+(34,1,1,'毎日','まいにち','global'),
 (35,1,1,'宿題','しゅくだい','global'),
 (36,1,1,'雪','ゆき','global'),
 (37,1,1,'山','やま','global'),
@@ -1755,4 +1755,4 @@ INSERT INTO japanese.EnglishDefinition(Definition,CardId,Owner) VALUES ('school'
 ('three',509,'global'),
 ('radio-cassette player',510,'global'),
 ('polyethylene terephthalate',511,'global'),
-('PET',511,'global');
+('PET',511,'global')
