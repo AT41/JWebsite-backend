@@ -19,4 +19,11 @@ db_cards.getCards = function getCards(cardObject, username) {
   );
 };
 
+db_cards.getCardCount = function getCardCount(setIds, username) {
+  return pool.my_db_query(`SELECT COUNT(*) as count from CARD WHERE 
+    (CardOwner="global" OR CardOwner="${username}") AND 
+    (${setIds.map(id => `SetId=${id}`).join(' OR ')})
+  `);
+}
+
 module.exports = db_cards;

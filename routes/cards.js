@@ -23,4 +23,11 @@ router.get('/cards', function(req, res, next) {
   db_cards.getCards(req.query).subscribe((val) => res.json(val));
 });
 
+router.get('/cardCount', function(req, res) {
+  const username = req.query['username'];
+  const setIds = req.query['SetIds'].split(',');
+  
+  db_cards.getCardCount(setIds).subscribe(val => res.json(val));
+})
+
 module.exports = router;
