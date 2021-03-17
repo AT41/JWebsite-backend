@@ -1,12 +1,15 @@
 var https = require('https');
 var fs = require('fs');
 
-var jlptLevel = 4;
+var jlptLevel = 1;
 var supersetId = jlptLevel;
 var supersetDescription = `JLPT-N${jlptLevel} Vocabulary with the jlpt-n${jlptLevel} tag. Words and definitions are retrieved from Jisho.org's database.`
 
 var cardAndSetIdStarts = [{},
-    {},
+    {
+        cardIdStart: 1200,
+        setIdStart: 100
+    },
     {},
     {},
     {

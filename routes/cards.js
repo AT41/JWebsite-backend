@@ -20,12 +20,13 @@ router.get('/cards', function(req, res, next) {
     }
   });
 
-  db_cards.getCards(req.query).subscribe((val) => res.json(val));
+  const setIds = req.query['setIds'].split(',');
+  db_cards.getCards(setIds, req.query).subscribe((val) => res.json(val));
 });
 
 router.get('/cardCount', function(req, res) {
   const username = req.query['username'];
-  const setIds = req.query['SetIds'].split(',');
+  const setIds = req.query['setIds'].split(',');
   
   db_cards.getCardCount(setIds).subscribe(val => res.json(val));
 })
